@@ -1,0 +1,2 @@
+<?php
+declare(strict_types=1); namespace OCA\JsonDashboard\Settings; use OCP\{IL10N,IURLGenerator}; use OCP\Settings\IIconSection; final class PersonalSection implements IIconSection { public function __construct(private IL10N $l,private IURLGenerator $u){} public function getID():string{return 'jsondashboard';} public function getName():string{return $this->l->t('JSON Dashboard');} public function getPriority():int{return 80;} public function getIcon():string{return $this->u->imagePath('jsondashboard','app-dark.svg');} }

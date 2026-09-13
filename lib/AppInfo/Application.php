@@ -1,0 +1,6 @@
+<?php
+declare(strict_types=1);
+namespace OCA\JsonDashboard\AppInfo;
+use OCA\JsonDashboard\Dashboard\JsonDashboardWidget1; use OCA\JsonDashboard\Dashboard\JsonDashboardWidget2; use OCA\JsonDashboard\Dashboard\JsonDashboardWidget3; use OCA\JsonDashboard\Dashboard\JsonDashboardWidget4; use OCA\JsonDashboard\Dashboard\JsonDashboardWidget5; use OCA\JsonDashboard\Dashboard\JsonDashboardWidget6; use OCA\JsonDashboard\Dashboard\JsonDashboardWidget7; use OCA\JsonDashboard\Dashboard\JsonDashboardWidget8;
+use OCP\AppFramework\App; use OCP\AppFramework\Bootstrap\{IBootContext,IBootstrap,IRegistrationContext};
+final class Application extends App implements IBootstrap { public const APP_ID='jsondashboard'; public const MAX_WIDGETS=8; public function __construct(array $urlParams=[]){parent::__construct(self::APP_ID,$urlParams);} public function register(IRegistrationContext $context):void{ foreach([JsonDashboardWidget1::class, JsonDashboardWidget2::class, JsonDashboardWidget3::class, JsonDashboardWidget4::class, JsonDashboardWidget5::class, JsonDashboardWidget6::class, JsonDashboardWidget7::class, JsonDashboardWidget8::class] as $widget){$context->registerDashboardWidget($widget);} } public function boot(IBootContext $context):void{} }

@@ -1,0 +1,5 @@
+(() => {
+  'use strict';
+  const button=document.getElementById('jd-save');if(!button)return;
+  button.addEventListener('click',async()=>{button.disabled=true;const message=document.getElementById('jd-message');message.textContent='Wird gespeichert …';const widgets=[...document.querySelectorAll('.jd-row')].map(row=>({enabled:row.querySelector('.jd-enabled').checked,title:row.querySelector('.jd-title').value,url:row.querySelector('.jd-url').value,key:row.querySelector('.jd-key').value,icon:row.querySelector('.jd-icon:checked')?.value||'dashboard'}));try{const response=await fetch(OC.generateUrl('/apps/jsondashboard/settings'),{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json',requesttoken:OC.requestToken},body:JSON.stringify({widgets})});const payload=await response.json();if(!response.ok)throw new Error(payload.message);message.textContent='Gespeichert. Dashboard neu laden, damit das Icon übernommen wird.'}catch(error){message.textContent=error.message||'Fehler'}finally{button.disabled=false}});
+})();
