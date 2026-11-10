@@ -4,11 +4,18 @@
     <name>JSON Dashboard</name>
     <summary>Persönliche JSON-Dashboard-Widgets</summary>
     <description>Jeder Benutzer kann mehrere HTTPS-JSON-Quellen als eigene Dashboard-Widgets konfigurieren.</description>
-    <version>1.5.0</version>
+    <version>1.5.1</version>
     <licence>agpl</licence>
     <author>Sascha Rankers</author>
     <namespace>JsonDashboard</namespace>
     <category>tools</category>
-    <dependencies><nextcloud min-version="29" max-version="34"/><php min-version="8.1"/></dependencies>
-    <settings><personal>OCA\JsonDashboard\Settings\Personal</personal><personal-section>OCA\JsonDashboard\Settings\PersonalSection</personal-section></settings>
+    <bugs>https://github.com/rankerson/nextcloud_jsonDashboard/issues</bugs>
+    <dependencies>
+        <php min-version="8.1"/>
+        <nextcloud min-version="29" max-version="999"/>
+    </dependencies>
+    <settings>
+        <personal>OCA\JsonDashboard\Settings\Personal</personal>
+        <personal-section>OCA\JsonDashboard\Settings\PersonalSection</personal-section>
+    </settings>
 </info>
