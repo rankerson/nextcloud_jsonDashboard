@@ -1,0 +1,38 @@
+name: Build release archive
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Build archive
+        id: package
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          mkdir -p build
+          mkdir -p build/jsondashboard
+          rsync -a --exclude='.git' --exclude='.github' --exclude='build' ./ build/jsondashboard/
+          tar -czf "build/jsondashboard-${VERSION}.tar.gz" -C build jsondashboard
+          cd build
+          sha256sum "jsondashboard-${VERSION}.tar.gz" > "jsondashboard-${VERSION}.tar.gz.sha256"
+
+      - name: Upload release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          gh release upload "${GITHUB_REF_NAME}" \
+            "build/jsondashboard-${VERSION}.tar.gz" \
+            "build/jsondashboard-${VERSION}.tar.gz.sha256" \
+            --clobber
