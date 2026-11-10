@@ -6,8 +6,8 @@ Die App speichert die Einstellungen benutzerbezogen. Es gibt keine eigene Datenb
 
 ## Voraussetzungen
 
-- Nextcloud 29 bis 34
-- PHP 8.1 oder neuer
+- Nextcloud 29 oder neuer (keine künstliche obere Versionsgrenze; tatsächliche Kompatibilität wird über CI geprüft)
+- PHP 8.1 oder neuer, sofern von der eingesetzten Nextcloud-Version unterstützt
 - HTTPS-Zugriff vom Nextcloud-Server auf die konfigurierten JSON-Quellen
 - Dashboard-App von Nextcloud
 
@@ -17,12 +17,12 @@ Die unterstützte App-ID ist `jsondashboard`. Der Zielpfad in einer AIO-Installa
 /var/www/html/custom_apps/jsondashboard
 ```
 
-## Installation
+## Installation und Update
 
 Das Release-Archiv mit der gewünschten Version herunterladen und die Prüfsumme prüfen:
 
 ```bash
-VERSION=1.5.0
+VERSION=1.5.1
 curl --fail --location \
   "https://github.com/rankerson/nextcloud_jsonDashboard/releases/download/v${VERSION}/jsondashboard-${VERSION}.tar.gz" \
   --output "jsondashboard-${VERSION}.tar.gz"
@@ -134,37 +134,13 @@ Die JSON-Abfragen erfolgen serverseitig aus dem Nextcloud-Container. Deshalb sol
 
 Die Antwortdaten werden als Text in DOM-Knoten eingesetzt; HTML aus der Quelle wird nicht als Markup interpretiert.
 
-## Quellcode-Struktur
+## Entwicklung und Kompatibilität
 
-```text
-jsondashboard/
-├── appinfo/
-│   ├── info.xml
-│   └── routes.php
-├── css/
-│   ├── dashboard.css
-│   └── settings.css
-├── img/
-│   └── app-dark.svg
-├── js/
-│   ├── dashboard.js
-│   └── settings.js
-├── lib/
-│   ├── AppInfo/Application.php
-│   ├── Controller/
-│   │   ├── DataController.php
-│   │   └── SettingsController.php
-│   ├── Dashboard/
-│   │   ├── AbstractJsonDashboardWidget.php
-│   │   └── JsonDashboardWidget1.php … JsonDashboardWidget8.php
-│   └── Settings/
-│       ├── Personal.php
-│       └── PersonalSection.php
-└── templates/
-    └── personal.php
-```
+Pull Requests und Commits werden durch GitHub Actions geprüft. Die CI führt PHP-Syntaxprüfungen und eine Validierung von `appinfo/info.xml` aus und testet die Installation/Aktivierung der App in mehreren Nextcloud-Versionen.
 
-Die acht Widget-Klassen registrieren jeweils einen Slot. Die Einstellungen und die Datenabfrage verwenden dieselbe Slotnummer.
+Die App-Metadaten enthalten absichtlich keine maximale Nextcloud-Version. Das verhindert eine rein administrative Installationssperre bei einem neuen Major-Release. Es ist jedoch keine Garantie für zukünftige API-Kompatibilität: Änderungen an Nextclouds öffentlichen APIs müssen weiterhin durch Tests erkannt und bei Bedarf im Code behoben werden.
+
+Ein neues GitHub-Release erzeugt automatisch ein Installationsarchiv samt SHA256-Prüfsumme. Eine Veröffentlichung im Nextcloud App Store ist davon getrennt und benötigt gegebenenfalls zusätzliche Signierung und App-Store-Konfiguration.
 
 ## Fehlerbehebung
 
