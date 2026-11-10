@@ -1,0 +1,107 @@
+name: App CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '23 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  php-lint:
+    name: PHP syntax (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.1', '8.2', '8.3', '8.4']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2.37.2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - name: Check PHP syntax
+        run: |
+          find . -type f -name '*.php' -not -path './.git/*' -print0 |
+            xargs -0 -r -n1 php -l
+
+  info-xml:
+    name: Validate app metadata
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Install XML validator
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+
+      - name: Download Nextcloud app metadata schema
+        run: curl --fail --location --silent --show-error https://apps.nextcloud.com/schema/apps/info.xsd --output info.xsd
+
+      - name: Validate info.xml
+        run: xmllint --noout --schema info.xsd appinfo/info.xml
+
+  nextcloud-smoke-test:
+    name: Install on Nextcloud ${{ matrix.version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ['34-apache', '35-apache', 'stable-apache']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Start Nextcloud
+        run: |
+          docker run --detach --name nextcloud --publish 8080:80 \
+            --env SQLITE_DATABASE=nextcloud \
+            --env NEXTCLOUD_ADMIN_USER=admin \
+            --env NEXTCLOUD_ADMIN_PASSWORD=ci-test-password \
+            --env NEXTCLOUD_TRUSTED_DOMAINS=localhost \
+            --volume "$GITHUB_WORKSPACE:/var/www/html/custom_apps/jsondashboard:ro" \
+            nextcloud:${{ matrix.version }}
+
+      - name: Wait for Nextcloud installation
+        run: |
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8080/status.php >/dev/null; then
+              if docker exec -u www-data nextcloud php occ status --output=json | grep -q '"installed":true'; then
+                exit 0
+              fi
+            fi
+            sleep 5
+          done
+          docker logs nextcloud
+          exit 1
+
+      - name: Enable JSON Dashboard
+        run: docker exec -u www-data nextcloud php occ app:enable jsondashboard
+
+      - name: Verify app is enabled
+        run: |
+          docker exec -u www-data nextcloud php occ app:list --output=json |
+            grep -q '"jsondashboard"'
+
+      - name: Show container logs on failure
+        if: failure()
+        run: docker logs nextcloud
