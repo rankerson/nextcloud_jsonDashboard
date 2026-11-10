@@ -136,11 +136,25 @@ Die Antwortdaten werden als Text in DOM-Knoten eingesetzt; HTML aus der Quelle w
 
 ## Entwicklung und Kompatibilität
 
-Pull Requests und Commits werden durch GitHub Actions geprüft. Die CI führt PHP-Syntaxprüfungen und eine Validierung von `appinfo/info.xml` aus und testet die Installation/Aktivierung der App in mehreren Nextcloud-Versionen.
+Pull Requests und Commits werden durch GitHub Actions geprüft. Die CI führt PHP-Syntaxprüfungen und eine Validierung von `appinfo/info.xml` aus und testet die Installation/Aktivierung der App in mehreren Nextcloud-Versionen. Die Tests laufen zusätzlich wöchentlich, damit auch Änderungen an Nextcloud-Basisimages auffallen.
 
 Die App-Metadaten enthalten absichtlich keine maximale Nextcloud-Version. Das verhindert eine rein administrative Installationssperre bei einem neuen Major-Release. Es ist jedoch keine Garantie für zukünftige API-Kompatibilität: Änderungen an Nextclouds öffentlichen APIs müssen weiterhin durch Tests erkannt und bei Bedarf im Code behoben werden.
 
-Ein neues GitHub-Release erzeugt automatisch ein Installationsarchiv samt SHA256-Prüfsumme. Eine Veröffentlichung im Nextcloud App Store ist davon getrennt und benötigt gegebenenfalls zusätzliche Signierung und App-Store-Konfiguration.
+### Eine neue Version veröffentlichen
+
+1. Versionsnummer in `appinfo/info.xml` erhöhen.
+2. Eintrag in `CHANGELOG.md` ergänzen.
+3. Änderungen über einen Pull Request nach `main` übernehmen und auf erfolgreiche CI warten.
+4. Auf `main` einen Versions-Tag pushen, zum Beispiel:
+
+   ```bash
+   git tag v1.5.2
+   git push origin v1.5.2
+   ```
+
+   GitHub Actions erstellt daraus automatisch ein GitHub Release mit Installationsarchiv und SHA256-Prüfsumme.
+
+Eine Veröffentlichung im Nextcloud App Store ist davon getrennt und benötigt gegebenenfalls zusätzliche Signierung und App-Store-Konfiguration.
 
 ## Fehlerbehebung
 
